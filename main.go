@@ -6,13 +6,13 @@ import (
 )
 
 func main() {
-	router := gin.Default()
+	r := gin.Default()
 
-	router.GET("/ping", func(c *gin.Context){
+	r.POST("/book_usage_statistic_items", func(c *gin.Context){
 		c.String(http.StatusOK, "pong")
 	})
 
-	router.Run(":8080")
+	r.Run(":8080")
 }
 
 
