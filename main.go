@@ -24,7 +24,7 @@ func main() {
 		var form BookUsageStatisticItem
 
 		if errs := c.Bind(&form); errs != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"errors": errs})
+			c.JSON(http.StatusBadRequest, gin.H{"Errors": errs})
 			return
 		}
 
