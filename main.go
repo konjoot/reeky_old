@@ -1,35 +1,49 @@
 package main
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/konjoot/gin"
+	_ "github.com/lib/pq"
 	"net/http"
 )
-
-type BookUsageStatisticItem struct {
-	ProfileId  int `form:"profile_id" binding:"required"`
-	BookItemId int `form:"book_item_id" binding:"required"`
-}
-
-type BookUsageStatisticItemDB struct {
-	Id         int `db:"id"`
-	ProfileId  int `db:"profile_id"`
-	BookItemId int `db:"book_item_id"`
-}
 
 func main() {
 	r := gin.Default()
 
-	r.POST("/book_usage_statistic_items", func(c *gin.Context) {
+	db, err := sqlx.Connect("postgres", "user=konjoot dbname=reeky sslmode=disable")
 
-		var form BookUsageStatisticItem
+	if err != nil {
+		panic("Can't establish database connection!")
+	}
+
+	r.POST("/book_usage_statistic_items", func(c *gin.Context) {
+		type busiForm struct {
+			ProfileId  int `form:"profile_id" binding:"required"`
+			BookItemId int `form:"book_item_id" binding:"required"`
+		}
+
+		type busiView struct {
+			Id int64
+			busiForm
+		}
+
+		var form busiForm
 
 		if errs := c.Bind(&form); errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Errors": errs})
 			return
 		}
 
-		c.JSON(200, &form)
-		// curl -v --form profile_id=1 --form book_item_id=2 http://localhost:8080/book_usage_statistic_items
+		var view = busiView{0, form}
+
+		query := "INSERT INTO book_usage_statistic_items (profile_id, book_item_id) VALUES ($1, $2) RETURNING id;"
+
+		if err := db.QueryRowx(query, form.ProfileId, form.BookItemId).Scan(&view.Id); err != nil {
+			c.JSON(http.StatusNotAcceptable, gin.H{"Error": err})
+			return
+		}
+
+		c.JSON(200, &view)
 	})
 
 	r.Run(":8080")
