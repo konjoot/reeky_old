@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"github.com/konjoot/gin"
 	_ "github.com/lib/pq"
 	"net/http"
 )
