@@ -14,8 +14,8 @@ CREATE TABLE book_usage_statistic_items (
   id           serial NOT NULL,
   profile_id   integer NOT NULL,
   book_item_id integer NOT NULL,
-  created_at   timestamp DEFAULT Now(),
-  updated_at   timestamp DEFAULT Now(),
+  created_at   timestamp DEFAULT (now() at time zone 'utc'),
+  updated_at   timestamp DEFAULT (now() at time zone 'utc'),
   CONSTRAINT busi_pkey PRIMARY KEY(id)
 );
 
@@ -25,8 +25,8 @@ CREATE TABLE book_usage_sessions (
   book_usage_statistic_item_id integer NOT NULL REFERENCES book_usage_statistic_items (id) ON DELETE CASCADE,
   duration   integer NOT NULL,
   begin_time timestamp,
-  created_at timestamp DEFAULT Now(),
-  updated_at timestamp DEFAULT Now()
+  created_at timestamp DEFAULT (now() at time zone 'utc'),
+  updated_at timestamp DEFAULT (now() at time zone 'utc')
 )`
 
 func main() {
