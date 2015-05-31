@@ -50,16 +50,47 @@ func main() {
 
 		stmt, err := db.Preparex(`
 		INSERT INTO book_usage_statistic_items (profile_id, book_item_id)
-			VALUES ($1, $2) RETURNING id, created_at, updated_at`)
+			VALUES ($1, $2) RETURNING *`)
 
 		if err != nil {
-			c.JSON(http.StatusNotAcceptable, gin.H{"Error": err})
+			c.JSON(http.StatusNotAcceptable, gin.H{"Error": err.Error()})
 			return
 		}
 
-		view := busiView{busiForm: form}
+		var view busiView
 
-		stmt.QueryRowx(form.ProfileId, form.BookItemId).StructScan(&view)
+		if err = stmt.Get(&view, form.ProfileId, form.BookItemId); err != nil {
+			c.JSON(http.StatusNotAcceptable, gin.H{"Error": err.Error()})
+			return
+		}
+
+		c.JSON(200, &view)
+	})
+
+	r.PUT("/book_usage_statistic_items/:id", func(c *gin.Context) {
+		stmt, err := db.Preparex(`
+		UPDATE ONLY book_usage_statistic_items
+			SET (profile_id, book_item_id, updated_at) = ($2, $3, DEFAULT)
+			WHERE id = $1 RETURNING *`)
+
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": err.Error()})
+			return
+		}
+
+		var form busiForm
+
+		if errs := c.Bind(&form); errs != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"Errors": errs})
+			return
+		}
+
+		var view busiView
+
+		if err = stmt.Get(&view, c.Param("id"), form.ProfileId, form.BookItemId); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": err.Error()})
+			return
+		}
 
 		c.JSON(200, &view)
 	})
