@@ -10,8 +10,8 @@ import (
 )
 
 type busiForm struct {
-	ProfileId  int `form:"profile_id" binding:"required"`
-	BookItemId int `form:"book_item_id" binding:"required"`
+	ProfileId  int `binding:"required"`
+	BookItemId int `binding:"required"`
 }
 
 type timestamps struct {
